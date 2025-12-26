@@ -1,34 +1,84 @@
 // The Rat and The Time - Idle Game
-// The Rat kills Grass to become stronger
+// The Rat kills enemies to become stronger
+
+// Fixed-point precision: multiply all rates by this to store as integers
+const PRECISION = BigInt(1e18);
+
+class Enemy {
+  constructor(name, baseKillRatePerMinute, productionBonusPerMinute) {
+    this.name = name;
+    // Convert to per second and scale by PRECISION for fixed-point arithmetic
+    this.baseKillRate = BigInt(Math.floor((baseKillRatePerMinute / 60) * Number(PRECISION)));
+    this.productionBonus = BigInt(Math.floor((productionBonusPerMinute / 60) * Number(PRECISION)));
+    this.kills = BigInt(0);
+    this.accumulated = BigInt(0);
+  }
+
+  // Calculate production rate for this enemy (returns scaled BigInt)
+  getProductionRate() {
+    // Base rate + bonus from kills (both scaled by PRECISION)
+    return this.baseKillRate + (this.kills * this.productionBonus);
+  }
+
+  // Update enemy state
+  update(deltaTime, speedMultiplier) {
+    const productionRate = this.getProductionRate();
+    // productionRate is in PRECISION units, so actual rate = productionRate / PRECISION
+    // toKill (fraction 0-1) = (productionRate / PRECISION) * speedMultiplier * deltaTime
+    // Convert back to PRECISION units for accumulation
+    const actualRate = Number(productionRate) / Number(PRECISION);
+    const toKill = actualRate * speedMultiplier * deltaTime;
+    const toKillScaled = BigInt(Math.floor(toKill * Number(PRECISION)));
+    
+    this.accumulated += toKillScaled;
+
+    // When accumulated reaches PRECISION (1.0 in fixed-point), kill it
+    while (this.accumulated >= PRECISION) {
+      this.accumulated -= PRECISION;
+      this.kills++;
+    }
+  }
+
+  // Manually kill one of this enemy
+  manualKill() {
+    this.kills++;
+  }
+
+  // Get total kills
+  getTotalKills() {
+    return this.kills;
+  }
+
+  // Get accumulated as a number (0-1) for display
+  getAccumulatedFraction() {
+    return Number(this.accumulated) / Number(PRECISION);
+  }
+}
 
 class Game {
   constructor() {
-    this.kills = 0;
-    this.grassKilled = 0;
-    this.baseKillRate = 1 / 60; // 1 Grass per minute = 1/60 per second
-    this.grassPerSecond = 0;
+    // Initialize enemies
+    this.enemies = {
+      grass: new Enemy('Grass', 1, 0.1), // 1 per minute base, 0.1 per minute bonus per kill
+      stick: new Enemy('Stick', 1, 0.1), // Same stats for now
+    };
     this.lastUpdate = Date.now();
-    this.accumulatedGrass = 0;
   }
 
-  // Calculate current kill rate per second
+  // Calculate total kills across all enemies
+  getTotalKills() {
+    let total = BigInt(0);
+    for (const enemy of Object.values(this.enemies)) {
+      total += enemy.getTotalKills();
+    }
+    return total;
+  }
+
+  // Calculate speed multiplier from total kills (returns number for calculations)
   getKillRate() {
-    // Base rate * (1 + 0.01 * kills) for 1% faster per kill (linear)
-    return this.baseKillRate * (1 + 0.01 * this.kills);
-  }
-
-  // Calculate total production rate (base + accumulated bonuses)
-  getProductionRate() {
-    // Base: 1/60 per second
-    // Each kill adds 0.1 Grass per minute = 0.1/60 per second
-    const bonusRate = (this.kills * 0.1) / 60;
-    return this.baseKillRate + bonusRate;
-  }
-
-  // Manually kill one Grass
-  manualKill() {
-    this.kills++;
-    this.grassKilled++;
+    // 1% faster per kill (linear multiplier)
+    const totalKills = Number(this.getTotalKills());
+    return 1 + 0.01 * totalKills;
   }
 
   // Update game state
@@ -37,18 +87,34 @@ class Game {
     const deltaTime = (now - this.lastUpdate) / 1000; // Convert to seconds
     this.lastUpdate = now;
 
-    // Calculate how much grass to kill based on current production rate
-    const productionRate = this.getProductionRate();
-    const grassToKill = productionRate * deltaTime;
-    
-    this.accumulatedGrass += grassToKill;
+    const speedMultiplier = this.getKillRate();
 
-    // When accumulated grass reaches 1, kill it
-    while (this.accumulatedGrass >= 1) {
-      this.accumulatedGrass -= 1;
-      this.kills++;
-      this.grassKilled++;
+    // Update all enemies
+    for (const enemy of Object.values(this.enemies)) {
+      enemy.update(deltaTime, speedMultiplier);
     }
+  }
+
+  // Manually kill one enemy
+  manualKill(enemyName) {
+    if (this.enemies[enemyName]) {
+      this.enemies[enemyName].manualKill();
+    }
+  }
+
+  // Format BigInt for display
+  formatBigInt(value) {
+    const num = Number(value);
+    if (num >= 1e12) {
+      return (num / 1e12).toFixed(2) + 'T';
+    } else if (num >= 1e9) {
+      return (num / 1e9).toFixed(2) + 'B';
+    } else if (num >= 1e6) {
+      return (num / 1e6).toFixed(2) + 'M';
+    } else if (num >= 1e3) {
+      return (num / 1e3).toFixed(2) + 'K';
+    }
+    return num.toLocaleString();
   }
 
   // Display game stats
@@ -58,18 +124,34 @@ class Game {
     console.log("║   THE RAT AND THE TIME             ║");
     console.log("╚════════════════════════════════════╝");
     console.log("");
-    console.log(`🐀 The Rat has killed: ${this.grassKilled} Grass`);
-    console.log(`⚡ Speed multiplier: ${((1 + 0.01 * this.kills) * 100).toFixed(2)}%`);
-    console.log(`📊 Current kill rate: ${(this.getProductionRate() * 60).toFixed(3)} Grass/minute`);
-    console.log(`⏱️  Next kill in: ${((1 - this.accumulatedGrass) / this.getProductionRate()).toFixed(1)} seconds`);
+    
+    const totalKills = this.getTotalKills();
+    console.log(`🐀 The Rat has killed: ${this.formatBigInt(totalKills)} total enemies`);
+    console.log(`⚡ Speed multiplier: ${(this.getKillRate() * 100).toFixed(2)}%`);
     console.log("");
+    
+    // Display stats for each enemy
+    for (const [key, enemy] of Object.entries(this.enemies)) {
+      const productionRate = Number(enemy.getProductionRate()) / Number(PRECISION);
+      const killRate = this.getKillRate();
+      const effectiveRate = productionRate * killRate;
+      const accumulated = enemy.getAccumulatedFraction();
+      const nextKillTime = accumulated >= 1 ? 0 : (1 - accumulated) / effectiveRate;
+      
+      console.log(`${enemy.name}:`);
+      console.log(`  Killed: ${this.formatBigInt(enemy.getTotalKills())}`);
+      console.log(`  Rate: ${(effectiveRate * 60).toFixed(3)}/minute`);
+      console.log(`  Next kill in: ${nextKillTime.toFixed(1)}s`);
+      console.log("");
+    }
+    
     console.log("Press Enter to manually kill 1 Grass | Ctrl+C to exit");
   }
 
   // Start the game loop
   start() {
     console.log("Starting The Rat and The Time...");
-    console.log("The Rat begins hunting Grass!");
+    console.log("The Rat begins hunting!");
     console.log("");
 
     // Set up stdin for manual input
@@ -80,7 +162,7 @@ class Game {
     // Listen for Enter key (key code 13 or '\r')
     process.stdin.on('data', (key) => {
       if (key === '\r' || key === '\n' || key === '\u000d' || key === '\u000a') {
-        this.manualKill();
+        this.manualKill('grass');
       }
       // Allow Ctrl+C to exit
       if (key === '\u0003') {
