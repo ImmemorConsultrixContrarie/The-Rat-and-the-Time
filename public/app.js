@@ -62,6 +62,39 @@ class Game {
     this.lastUpdate = Date.now();
   }
 
+  // Serialize game state for saving
+  serialize() {
+    const enemies = {};
+    for (const [name, enemy] of Object.entries(this.enemies)) {
+      enemies[name] = {
+        kills: enemy.kills.toString(),
+        accumulated: enemy.accumulated.toString()
+      };
+    }
+    return { enemies, lastUpdate: this.lastUpdate };
+  }
+
+  // Load game state
+  load(data) {
+    for (const [name, enemyData] of Object.entries(data.enemies)) {
+      if (this.enemies[name]) {
+        this.enemies[name].kills = BigInt(enemyData.kills);
+        this.enemies[name].accumulated = BigInt(enemyData.accumulated);
+      }
+    }
+    this.lastUpdate = data.lastUpdate;
+  }
+
+  // Save game state
+  save() {
+    const state = this.serialize();
+    fetch('/api/save-state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state)
+    }).catch(err => console.error('Save failed:', err));
+  }
+
   // Calculate total kills across all enemies
   getTotalKills() {
     let total = BigInt(0);
@@ -143,7 +176,31 @@ class Game {
   }
 
   // Start the game loop
-  start() {
+  async start() {
+    // Load game state
+    try {
+      const response = await fetch('/api/game-state');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.enemies && Object.keys(data.enemies).length > 0) {
+          this.load(data);
+          // Calculate offline progress
+          const now = Date.now();
+          const offlineTime = (now - this.lastUpdate) / 1000;
+          if (offlineTime > 0) {
+            // Simulate offline updates
+            const speedMultiplier = this.getKillRate();
+            for (const enemy of Object.values(this.enemies)) {
+              enemy.update(offlineTime, speedMultiplier);
+            }
+          }
+          this.lastUpdate = now;
+        }
+      }
+    } catch (err) {
+      console.error('Load failed:', err);
+    }
+
     // Create enemy panels dynamically
     const enemiesContainer = document.getElementById('enemies');
     for (const [key, enemy] of Object.entries(this.enemies)) {
@@ -180,6 +237,13 @@ class Game {
     setInterval(() => {
       this.update();
       this.updateDisplay();
+      // Save state every 10 seconds (100 iterations * 100ms = 10s)
+      if (this.saveCounter === undefined) this.saveCounter = 0;
+      this.saveCounter++;
+      if (this.saveCounter >= 100) {
+        this.saveCounter = 0;
+        this.save();
+      }
     }, 100);
   }
 }
