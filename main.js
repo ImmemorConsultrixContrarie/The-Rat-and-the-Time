@@ -76,9 +76,12 @@ class Game {
 
   // Calculate speed multiplier from total kills (returns number for calculations)
   getKillRate() {
-    // 1% faster per kill (linear multiplier)
-    const totalKills = Number(this.getTotalKills());
-    return 1 + 0.01 * totalKills;
+    // Grass: 1% faster per kill, Stick: 2% faster per kill (multiplicative)
+    const grassKills = Number(this.enemies.grass.getTotalKills());
+    const stickKills = Number(this.enemies.stick.getTotalKills());
+    const grassMultiplier = 1 + 0.01 * grassKills;
+    const stickMultiplier = 1 + 0.02 * stickKills;
+    return grassMultiplier * stickMultiplier;
   }
 
   // Update game state
