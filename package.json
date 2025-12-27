@@ -2,10 +2,9 @@
   "name": "the-rat-and-the-time",
   "version": "1.0.0",
   "description": "An idle game where The Rat hunts Grass to become stronger.",
-  "main": "main.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "console": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

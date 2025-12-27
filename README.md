@@ -22,20 +22,6 @@ npm start
 
 Then open your browser and go to http://localhost:3000
 
-### Console Version
-
-Run the main file:
-
-```bash
-node main.js
-```
-
-Or:
-
-```bash
-npm run console
-```
-
 ## License
 
 MIT License - see LICENSE file for details.
