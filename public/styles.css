@@ -1,0 +1,147 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #2c2c2c;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+#game-container {
+    max-width: 800px;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    color: #ffcc00;
+}
+
+header p {
+    font-size: 1.1em;
+    color: #cccccc;
+}
+
+#stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.stat {
+    background-color: #3a3a3a;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 150px;
+    margin: 10px;
+}
+
+.stat .label {
+    display: block;
+    font-size: 0.9em;
+    color: #aaaaaa;
+    margin-bottom: 5px;
+}
+
+.stat .value {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+#enemies {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.enemy-panel {
+    background-color: #3a3a3a;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.enemy-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.enemy-name {
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+.enemy-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.enemy-stat {
+    text-align: center;
+    min-width: 120px;
+}
+
+.enemy-stat .label {
+    display: block;
+    font-size: 0.8em;
+    color: #aaaaaa;
+    margin-bottom: 2px;
+}
+
+.enemy-stat .value {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.progress-container {
+    background-color: #555;
+    border-radius: 10px;
+    height: 20px;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #4caf50;
+    width: 0%;
+    transition: width 0.1s ease;
+}
+
+.manual-kill-btn {
+    background-color: #ff5722;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+
+.manual-kill-btn:hover {
+    background-color: #d84315;
+}
+
+.manual-kill-btn:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+}

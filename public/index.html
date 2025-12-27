@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Rat and The Time</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>🐀 THE RAT AND THE TIME</h1>
+            <p>An idle game where The Rat hunts enemies to become stronger</p>
+        </header>
+
+        <main>
+            <section id="stats">
+                <div class="stat">
+                    <span class="label">Total Kills:</span>
+                    <span class="value" id="total-kills">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Speed Multiplier:</span>
+                    <span class="value" id="speed-multiplier">100.00%</span>
+                </div>
+            </section>
+
+            <section id="enemies">
+                <!-- Enemy panels will be dynamically generated here -->
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -12,10 +12,28 @@ An idle game where The Rat hunts Grass to become stronger.
 
 ## Getting Started
 
+### Web Version (Recommended)
+
+Run the web server:
+
+```bash
+npm start
+```
+
+Then open your browser and go to http://localhost:3000
+
+### Console Version
+
 Run the main file:
 
 ```bash
 node main.js
+```
+
+Or:
+
+```bash
+npm run console
 ```
 
 ## License
