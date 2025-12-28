@@ -36,11 +36,6 @@ class Enemy {
     }
   }
 
-  // Manually kill one of this enemy
-  manualKill() {
-    this.kills++;
-  }
-
   // Get total kills
   getTotalKills() {
     return this.kills;
@@ -128,10 +123,11 @@ class Game {
     }
   }
 
-  // Manually kill one enemy
-  manualKill(enemyName) {
+  // Progress one enemy by one second
+  progressKill(enemyName) {
     if (this.enemies[enemyName]) {
-      this.enemies[enemyName].manualKill();
+      const speedMultiplier = this.getKillRate();
+      this.enemies[enemyName].update(1, speedMultiplier);
     }
   }
 
@@ -210,7 +206,7 @@ class Game {
       panel.innerHTML = `
         <div class="enemy-header">
           <div class="enemy-name">${enemy.name}</div>
-          <button class="manual-kill-btn" onclick="game.manualKill('${key}')">Kill 1</button>
+          <button class="manual-kill-btn" onclick="game.progressKill('${key}')">Progress 1 second</button>
         </div>
         <div class="enemy-stats">
           <div class="enemy-stat">
