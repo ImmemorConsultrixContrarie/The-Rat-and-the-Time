@@ -131,6 +131,16 @@ class Game {
     }
   }
 
+  // Reset all progress
+  resetProgress() {
+    for (const enemy of Object.values(this.enemies)) {
+      enemy.kills = BigInt(0);
+      enemy.accumulated = BigInt(0);
+    }
+    this.save();
+    this.updateDisplay();
+  }
+
   // Format BigInt for display
   formatBigInt(value) {
     const num = Number(value);
@@ -241,6 +251,34 @@ class Game {
         this.save();
       }
     }, 100);
+
+    // Options modal
+    const optionsBtn = document.getElementById('options-btn');
+    const optionsModal = document.getElementById('options-modal');
+    const resetProgressBtn = document.getElementById('reset-progress-btn');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
+    optionsBtn.addEventListener('click', () => {
+      optionsModal.style.display = 'block';
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      optionsModal.style.display = 'none';
+    });
+
+    resetProgressBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+        game.resetProgress();
+        optionsModal.style.display = 'none';
+      }
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+      if (event.target === optionsModal) {
+        optionsModal.style.display = 'none';
+      }
+    });
   }
 }
 

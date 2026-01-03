@@ -9,7 +9,10 @@
 <body>
     <div id="game-container">
         <header>
-            <h1>🐀 THE RAT AND THE TIME</h1>
+            <div class="header-content">
+                <h1>🐀 THE RAT AND THE TIME</h1>
+                <button id="options-btn">Options</button>
+            </div>
             <p>An idle game where The Rat hunts enemies to become stronger</p>
         </header>
 
@@ -29,6 +32,14 @@
                 <!-- Enemy panels will be dynamically generated here -->
             </section>
         </main>
+    </div>
+
+    <div id="options-modal" class="modal">
+        <div class="modal-content">
+            <h2>Options</h2>
+            <button id="reset-progress-btn">Reset Progress</button>
+            <button id="close-modal-btn">Close</button>
+        </div>
     </div>
 
     <script src="app.js"></script>
